@@ -1,0 +1,13 @@
+{
+  "name":"Speed Fact",
+  "short_name":"Speed Fact",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#ffffff",
+  "theme_color":"#ffffff",
+  "description":"Fiches chantier, registre phyto et facturation agricole",
+  "icons":[
+    {"src":"assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
