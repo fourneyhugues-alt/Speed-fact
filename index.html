@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="src/styles.css">
+<title>Speed Fact</title>
+</head>
+<body>
+<div id="updateBanner" class="update-banner hidden">Une mise à jour de Speed Fact est disponible.<button onclick="SpeedFact.applyUpdate()">Mettre à jour</button></div>
+<div id="app" class="app-shell">
+  <header class="topbar">
+    <button class="icon-btn" aria-label="Réglages" onclick="SpeedFact.openSettings()">☰</button>
+    <div class="brand"><span class="bolt">⚡</span><span>SPEED</span> <b>FACT</b></div>
+    <button class="icon-btn" aria-label="Mise à jour" onclick="SpeedFact.checkUpdate(true)">☁</button>
+  </header>
+
+  <main>
+    <section id="screen-home" class="screen active">
+      <div class="hero"><div class="hero-overlay"><h1>Bonjour !</h1><p>Prêt pour un chantier ?</p><button class="cta" onclick="SpeedFact.startJob()"><span>⊕</span> NOUVEAU CHANTIER</button></div></div>
+      <div class="stats-grid">
+        <button class="stat-card" onclick="SpeedFact.showBilling()"><small>À FACTURER</small><div><span class="stat-icon red">▤</span><strong id="statBillable">0</strong></div><span>travaux</span></button>
+        <button class="stat-card" onclick="SpeedFact.showJobs()"><small>CHANTIERS CE MOIS</small><div><span class="stat-icon green">▣</span><strong id="statMonth">0</strong></div><span>chantiers</span></button>
+      </div>
+      <div class="section-head"><h2>Derniers chantiers</h2><button class="link-btn" onclick="SpeedFact.showJobs()">Voir tout</button></div>
+      <div id="recentJobs" class="list-card"></div>
+    </section>
+
+    <section id="screen-job" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.goHome()">←</button><h2 id="jobScreenTitle">Nouveau chantier</h2><span></span></div>
+      <div id="progress" class="progress"></div><div id="wizard"></div>
+    </section>
+
+    <section id="screen-jobs" class="screen">
+      <div class="screen-title"><span></span><h2>Chantiers</h2><button class="icon-btn" onclick="SpeedFact.toggleJobFilter()">⌕</button></div>
+      <div class="segmented"><button data-filter="all" class="active" onclick="SpeedFact.setJobFilter('all')">Tous</button><button data-filter="open" onclick="SpeedFact.setJobFilter('open')">À facturer</button><button data-filter="billed" onclick="SpeedFact.setJobFilter('billed')">Facturés</button></div>
+      <div id="jobFilterBox" class="search-box hidden"><input id="jobSearch" placeholder="Rechercher client, exploitation, parcelle, travail…" oninput="SpeedFact.renderJobs()"></div>
+      <div id="jobsList" class="timeline"></div>
+    </section>
+
+    <section id="screen-billing" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.goHome()">←</button><h2>À facturer</h2><button class="icon-btn" onclick="SpeedFact.showInvoiceHistory()">≡</button></div>
+      <div class="panel"><label>Client facturé</label><div class="autocomplete"><input id="billingClient" placeholder="Tape le nom du client" oninput="SpeedFact.renderBilling()"><div id="billingClientSug" class="suggestions hidden"></div></div><label>Entreprise qui facture</label><select id="billingIssuer"></select></div>
+      <div id="billingList" class="billing-list"></div>
+      <div class="bottom-action"><button class="cta" onclick="SpeedFact.createInvoice()">CRÉER LA FACTURE</button></div>
+    </section>
+
+    <section id="screen-history" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.showBilling()">←</button><h2>Historique factures</h2><span></span></div>
+      <div id="invoiceHistory" class="timeline"></div>
+    </section>
+
+    <section id="screen-settings" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.goHome()">←</button><h2>Réglages</h2><span></span></div>
+      <div class="settings-menu">
+        <button class="settings-link" onclick="SpeedFact.openIssuers()"><span>🏢</span><div><b>Entreprises émettrices</b><small>Coordonnées, IBAN, agrément, entreprise par défaut</small></div><strong>›</strong></button>
+        <button class="settings-link" onclick="SpeedFact.openClients()"><span>👤</span><div><b>Clients & exploitations</b><small>Fiches clients, e-mails, exploitations et parcelles</small></div><strong>›</strong></button>
+      </div>
+      <div class="panel"><h3>Facturation</h3><div class="field-row"><div><label>TVA par défaut</label><input id="vat" type="number" step="0.1" value="20"></div><div><label>Version</label><input value="V1.1" readonly></div></div><button class="cta" onclick="SpeedFact.saveSettings()">ENREGISTRER</button></div>
+      <div class="panel"><h3>Données</h3><p class="muted">Les données restent enregistrées sur ce téléphone. Fais une sauvegarde régulièrement.</p><div class="stack-buttons"><button class="soft-btn" onclick="SpeedFact.exportData()">Exporter une sauvegarde</button><label class="soft-btn file-label">Restaurer une sauvegarde<input type="file" accept="application/json" onchange="SpeedFact.importData(event)"></label></div></div>
+      <div class="panel status-panel"><h3>Catalogue E‑Phy</h3><p id="catalogStatus">Chargement…</p><small>Données E‑Phy – Anses, extraction 25/08/2026. Produits autorisés uniquement.</small></div>
+      <div class="panel status-panel"><h3>Mises à jour</h3><p id="updateStatus">Version installée : 1.1.0</p><button class="soft-btn" onclick="SpeedFact.checkUpdate(true)">Vérifier maintenant</button></div>
+    </section>
+
+    <section id="screen-issuers" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.openSettings()">←</button><h2>Entreprises émettrices</h2><button class="icon-btn" onclick="SpeedFact.newIssuer()">＋</button></div>
+      <div id="issuerList" class="timeline"></div><div id="issuerEditor"></div>
+    </section>
+
+    <section id="screen-clients" class="screen">
+      <div class="screen-title"><button class="back" onclick="SpeedFact.openSettings()">←</button><h2>Clients & exploitations</h2><button class="icon-btn" onclick="SpeedFact.newClient()">＋</button></div>
+      <div class="search-box"><input id="clientMasterSearch" placeholder="Rechercher un client…" oninput="SpeedFact.renderClientList()"></div>
+      <div id="clientMasterList" class="timeline"></div><div id="clientEditor"></div>
+    </section>
+
+    <section id="screen-invoice" class="screen invoice-screen">
+      <div class="invoice-toolbar no-print"><button class="soft-btn" onclick="SpeedFact.backFromInvoice()">← Retour</button><button class="soft-btn" onclick="window.print()">PDF / Imprimer</button><button class="cta small-cta" onclick="SpeedFact.sendInvoice()">ENVOYER</button></div>
+      <div id="invoiceDocument" class="invoice-document"></div>
+    </section>
+  </main>
+
+  <nav id="bottomNav" class="bottom-nav">
+    <button data-nav="home" class="active" onclick="SpeedFact.goHome()"><span>⌂</span><small>Accueil</small></button>
+    <button data-nav="jobs" onclick="SpeedFact.showJobs()"><span>♟</span><small>Chantiers</small></button>
+    <button data-nav="billing" onclick="SpeedFact.showBilling()"><span>▤</span><small>À facturer</small></button>
+    <button data-nav="settings" onclick="SpeedFact.openSettings()"><span>⚙</span><small>Réglages</small></button>
+  </nav>
+</div>
+<script src="products-authorized.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
